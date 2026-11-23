@@ -2,31 +2,142 @@
 
 # Embedded Firmware Update & Fault Injection Lab
 
-**A C++17 firmware update simulator featuring a binary protocol, CRC-32 integrity checks,
-a fault-tolerant update state machine, fault injection, and automated regression testing.**
+### Making sure a device can never be "bricked" by a bad software update
+
+**C++17 · binary protocol · CRC-32 integrity · update state machine · fault injection · automated testing**
 
 [![CI](https://github.com/Joun-Mikhail/embedded-firmware-update-lab/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Joun-Mikhail/embedded-firmware-update-lab/actions/workflows/ci.yml)
 ![C++17](https://img.shields.io/badge/C%2B%2B-17-1F6FEB?logo=cplusplus&logoColor=white)
 ![CMake](https://img.shields.io/badge/build-CMake%20%2B%20CTest-0E7C86?logo=cmake&logoColor=white)
-![Sanitizers](https://img.shields.io/badge/ASan%20%2B%20UBSan-CI-2E8B57)
-![Dependencies](https://img.shields.io/badge/dependencies-std%20only-0B1628)
+![Tests](https://img.shields.io/badge/tests-38%20passing-2E8B57)
+![Platforms](https://img.shields.io/badge/verified%20on-Linux%20%C2%B7%20Windows-1F6FEB)
+![Sanitizers](https://img.shields.io/badge/ASan%20%2B%20UBSan-clean-2E8B57)
 ![License](https://img.shields.io/badge/license-MIT-5A6B85)
 
 </div>
 
-A simulated device receives a firmware image as a stream of binary packets, validates every
-packet and the complete image, and **replaces its installed firmware only if everything checks
-out**. A deterministic fault-injection toolkit attacks each layer of that pipeline, and the
-regression suite proves that a failed update never changes the installed firmware.
-No hardware is required.
+---
+
+## In plain words
+
+Every smart device — a car's control unit, a pacemaker, a router, an IoT sensor — receives
+**firmware updates**. If an update arrives damaged, out of order or incomplete and the device
+installs it anyway, the device can stop working completely ("bricked").
+
+This project is a **software model of a device receiving an update**. It checks every piece
+of the update as it arrives, checks the finished file as a whole, and only then swaps it in.
+Then it **attacks itself on purpose** — flipping single bits, dropping or repeating pieces,
+lying about sizes — and proves, with automated tests, that the old firmware always survives.
+
+> 🟢 **Good update →** checked piece by piece, verified as a whole, installed in one step.
+> 🔴 **Damaged update →** rejected, and the device keeps running its previous version, untouched.
+
+## At a glance
+
+| | |
+|---|---|
+| 🎯 **Goal** | Prove that a failed update can never change the installed firmware |
+| 🧱 **Built with** | C++17, CMake, CTest, GitHub Actions — standard library only, no hardware needed |
+| 🧪 **Automated tests** | **38**, all passing, on Linux (GCC, Clang) and Windows (MSVC) |
+| 💥 **Fault types injected** | **15** — bit flips, corrupted checksums, cut-off packets, missing, duplicated and reordered packets, fake versions, and more |
+| 🎲 **Random robustness inputs** | **1 200** malformed packets per run, reproducible from a fixed seed |
+| 🛡️ **Memory-safety checks** | AddressSanitizer + UndefinedBehaviorSanitizer report **zero** issues |
+| 🔁 **Tests that catch real bugs** | Two bugs were planted on purpose — the suite caught both ([details](docs/regression_experiment.md)) |
+| ⚙️ **Continuous integration** | **7** automated jobs on every change: 2 compilers × 2 build types, 2 sanitizer builds, Windows |
+
+## See it run
+
+### On a Windows PC
+
+Real screenshots from the author's own Windows 11 PC (23 Nov 2026): Visual Studio Build Tools 2026,
+MSVC 19.51, Windows SDK 10.0.26100, warnings treated as errors.
 
 <p align="center">
-  <img src="assets/screenshots/demo.png" width="760"
-       alt="Terminal output of fwupdate_demo: v1 to v2 update passes and is committed; a v3 update with an injected bit flip passes every packet CRC but fails the image CRC at FINISH; firmware remains v2; after reset a clean v3 is accepted; RESULT: Update recovery and atomicity verified">
-  <br><sub>Real output of <code>fwupdate_demo --color</code> (GCC 13.3, Ubuntu 24.04), rendered from the recorded terminal session.</sub>
+  <img src="assets/screenshots/windows_demo.jpg" width="760"
+       alt="Windows Terminal on the author's PC running fwupdate_demo.exe: update to v2 passes and is installed; a v3 update with one flipped bit passes every packet check but fails the whole-image check, so v2 stays installed; after a reset a clean v3 is accepted; result: update recovery and atomicity verified">
+  <br><sub><b>① The demo</b> — a corrupted update is caught and the device keeps its working firmware.</sub>
 </p>
 
-## Core engineering capabilities
+<p align="center">
+  <img src="assets/screenshots/windows_tests.jpg" width="760"
+       alt="Windows Terminal on the author's PC running ctest: tests 18 to 38 shown as Passed, ending with 100% tests passed, 0 tests failed out of 38">
+  <br><sub><b>② The test suite</b> — <code>ctest</code> reports <b>100% tests passed, 0 failed out of 38</b>.</sub>
+</p>
+
+<details>
+<summary>③ The build (CMake + MSVC, warnings as errors)</summary>
+<p align="center">
+  <img src="assets/screenshots/windows_build.jpg" width="760"
+       alt="Windows Terminal on the author's PC: cmake 4.3.1 configures the project for Visual Studio 18 2026 with Windows SDK 10.0.26100 and MSVC 19.51, registers 37 test cases, then builds the core and fault libraries, the demo and the test executable">
+  <br><sub>CMake 4.3.1 configures for Visual Studio 2026 / MSVC 19.51 and builds the libraries, demo and tests.</sub>
+</p>
+</details>
+
+### On Linux and in CI
+
+<p align="center">
+  <img src="assets/screenshots/demo.png" width="720"
+       alt="Terminal output of fwupdate_demo on Linux: v1 to v2 update passes and is committed; a v3 update with an injected bit flip passes every packet CRC but fails the image CRC at FINISH; firmware remains v2; after reset a clean v3 is accepted">
+  <br><sub><b>Demo on Linux</b> (GCC 13.3, Ubuntu 24.04) — rendered from the recorded terminal output in <code>assets/evidence/</code>.</sub>
+</p>
+
+<p align="center">
+  <img src="assets/screenshots/ci_actions.jpg" width="620"
+       alt="GitHub Actions run summary page showing all seven CI jobs successful: Linux gcc Debug and Release, Linux clang Debug and Release, ASan plus UBSan for gcc and clang, and Windows MSVC">
+  <br><sub><b>GitHub Actions</b> — all 7 jobs green (browser capture of run <a href="https://github.com/Joun-Mikhail/embedded-firmware-update-lab/actions/runs/45277523799">#4</a>, commit <code>a43f70d</code>).</sub>
+</p>
+
+<details>
+<summary>More evidence: full Linux test and sanitizer runs</summary>
+<p align="center">
+  <img src="assets/screenshots/ctest.png" width="620" alt="CTest output listing 38 tests, all passed, GCC 13.3 build with warnings as errors">
+  <img src="assets/screenshots/ctest_sanitizers.png" width="620" alt="CTest output of the AddressSanitizer and UndefinedBehaviorSanitizer build, 38 of 38 tests passed">
+  <br><sub>Rendered from the recorded logs in <code>assets/evidence/</code>.</sub>
+</p>
+</details>
+
+## What this project demonstrates
+
+| Skill | Where you can see it |
+|-------|----------------------|
+| **Embedded / low-level C++** — fixed-width integers, byte-exact parsing, no undefined behaviour | [`src/packet.cpp`](src/packet.cpp), [`src/byte_io.hpp`](src/byte_io.hpp) |
+| **Protocol design & documentation** — a spec another engineer could implement from | [Protocol specification](docs/protocol_specification.md) |
+| **Firmware update logic** — state machine, version policy, all-or-nothing install | [`src/receiver.cpp`](src/receiver.cpp), [State machine](docs/state_machine.md) |
+| **Data integrity** — CRC-32 per packet and over the whole image | [`src/crc32.cpp`](src/crc32.cpp) |
+| **Test engineering** — negative testing, boundary cases, fault injection, reproducibility | [Test plan](docs/test_plan.md), [`tests/`](tests) |
+| **Verification mindset** — sanitizers, warnings-as-errors, proving the tests can fail | [Regression experiment](docs/regression_experiment.md) |
+| **CI/CD** — cross-platform GitHub Actions pipeline | [`.github/workflows/ci.yml`](.github/workflows/ci.yml) |
+| **Honest scoping** — what the project does *not* prove | [Limitations](docs/limitations.md) |
+
+## How it works
+
+```mermaid
+flowchart LR
+    A["📦 New firmware"] --> B["✂️ Split into<br/>numbered packets"]
+    B --> C{"🔍 Each packet<br/>intact & in order?"}
+    C -- no --> F["🔴 Reject update<br/>old firmware kept"]
+    C -- yes --> D["🗂️ Collect in a<br/>staging area"]
+    D --> E{"🔍 Whole image<br/>checksum correct?"}
+    E -- no --> F
+    E -- yes --> G["🟢 Install in one step<br/>new version active"]
+
+    classDef ok fill:#2E8B57,stroke:#0B1628,color:#ffffff
+    classDef bad fill:#C0392B,stroke:#0B1628,color:#ffffff
+    classDef step fill:#1F6FEB,stroke:#0B1628,color:#ffffff
+    classDef check fill:#0E7C86,stroke:#0B1628,color:#ffffff
+    class A,B,D step
+    class C,E check
+    class F bad
+    class G ok
+```
+
+---
+
+# Technical deep dive
+
+*The sections below are for engineers and reviewers.*
+
+## Engineering capabilities
 
 | | |
 |---|---|
@@ -156,21 +267,10 @@ Full matrix: [docs/test_plan.md](docs/test_plan.md#fault-injection-matrix).
 | GCC 13.3, `-Werror` (local) | **38 / 38 passed**, 0 warnings — [log](assets/evidence/ctest_gcc.txt) |
 | Clang 18.1, `-Werror` (local) | **38 / 38 passed**, 0 warnings |
 | GCC 13.3 + AddressSanitizer + UBSan (local) | **38 / 38 passed**, no reports — [log](assets/evidence/ctest_sanitizers_gcc.txt) |
+| MSVC 19.51 (VS Build Tools 2026), Release, `/W4 /WX` (author's own Windows 11 PC) | **38 / 38 passed**, demo OK — [screenshots](#on-a-windows-pc) |
 | GitHub Actions: GCC 13.3 & Clang 18.1 × Debug/Release, ASan+UBSan (GCC & Clang), MSVC 19.44 (VS 2022) `/W4 /WX` | **7 / 7 jobs green, 38 / 38 tests in each** — [workflow runs](https://github.com/Joun-Mikhail/embedded-firmware-update-lab/actions/workflows/ci.yml) |
 | Controlled regression experiment | disabling the image CRC → 3 tests fail; accepting equal versions → 2 tests fail — [details](docs/regression_experiment.md) |
 
-<details>
-<summary>CTest, sanitizer and GitHub Actions screenshots</summary>
-<p align="center">
-  <img src="assets/screenshots/ctest.png" width="620" alt="CTest output listing 38 tests, all passed, GCC 13.3 build with warnings as errors">
-  <img src="assets/screenshots/ctest_sanitizers.png" width="620" alt="CTest output of the AddressSanitizer and UndefinedBehaviorSanitizer build, 38 of 38 tests passed">
-  <br><sub>Rendered from the recorded logs in <code>assets/evidence/</code>.</sub>
-</p>
-<p align="center">
-  <img src="assets/screenshots/ci_actions.jpg" width="620" alt="GitHub Actions run summary page showing all seven CI jobs successful: Linux gcc Debug and Release, Linux clang Debug and Release, ASan plus UBSan for gcc and clang, and Windows MSVC">
-  <br><sub>Browser capture of GitHub Actions run <a href="https://github.com/Joun-Mikhail/embedded-firmware-update-lab/actions/runs/45277523799">#4</a> (pull request commit <code>a43f70d</code>), 2026-11-23.</sub>
-</p>
-</details>
 
 ## CI pipeline
 
@@ -212,10 +312,11 @@ cmake --build build-asan --parallel
 ctest --test-dir build-asan --output-on-failure
 ```
 
-**Windows (PowerShell, Visual Studio 2022)**
+**Windows (PowerShell, Visual Studio 2022 or 2026 / Build Tools with the C++ workload and a Windows SDK)**
 
 ```powershell
-cmake -S . -B build -G "Visual Studio 17 2022" -A x64
+# run from a "Developer PowerShell for VS"; CMake picks the newest Visual Studio automatically
+cmake -S . -B build -DFWUPDATE_WARNINGS_AS_ERRORS=ON
 cmake --build build --config Release --parallel
 ctest --test-dir build -C Release --output-on-failure
 .\build\Release\fwupdate_demo.exe
