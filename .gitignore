@@ -1,0 +1,8 @@
+build/
+build-*/
+out/
+.vs/
+.vscode/
+*.swp
+CMakeUserPresets.json
+compile_commands.json
