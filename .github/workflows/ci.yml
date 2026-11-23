@@ -60,7 +60,7 @@ jobs:
 
       - name: Upload test evidence
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: test-results-${{ matrix.compiler }}-${{ matrix.build_type }}
           path: |
@@ -101,7 +101,7 @@ jobs:
 
       - name: Upload sanitizer evidence
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: sanitizer-results-${{ matrix.compiler }}
           path: build-san/ctest-sanitizers.xml
