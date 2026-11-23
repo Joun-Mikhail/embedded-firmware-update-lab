@@ -101,7 +101,7 @@ installed firmware. All rows are executed by `FW_010` (unless noted).
 | GCC 13.3 + ASan + UBSan (local) | 38/38 passed, no sanitizer reports | [`assets/evidence/ctest_sanitizers_gcc.txt`](../assets/evidence/ctest_sanitizers_gcc.txt) |
 | Clang 18.1 + ASan + UBSan | 38/38 passed in CI (the local Clang install lacks the ASan runtime, so this ran in CI only) | GitHub Actions `sanitizers` job |
 | GCC 13.3 / Clang 18.1 × Debug/Release, `-Werror` | 38/38 passed in each CI job, demo exit 0 | GitHub Actions `linux` jobs (JUnit XML uploaded as artifacts) |
-| MSVC 19.51 (VS Build Tools 2026), Release, `/W4 /WX` | 38/38 passed, demo exit 0, 0 warnings | Author's own Windows 11 PC, 2026-11-23 ([screenshots](../README.md#on-a-windows-pc)) |
+| MSVC 19.51 (VS Build Tools 2026), Release, `/W4 /WX` | 38/38 passed, demo exit 0, 0 warnings | Author's own Windows 11 PC, 2026-11-23 ([screen captures](../README.md#see-it-run)) |
 | MSVC 19.44 (Visual Studio 2022), Release, `/W4 /WX` | 38/38 passed in CI, demo exit 0, 0 warnings | GitHub Actions `windows` job |
 | Demo | exit 0 | [`assets/evidence/demo_output.txt`](../assets/evidence/demo_output.txt) |
 | Controlled regression experiment | defects detected, then reverted | [regression_experiment.md](regression_experiment.md) |
