@@ -160,11 +160,15 @@ Full matrix: [docs/test_plan.md](docs/test_plan.md#fault-injection-matrix).
 | Controlled regression experiment | disabling the image CRC → 3 tests fail; accepting equal versions → 2 tests fail — [details](docs/regression_experiment.md) |
 
 <details>
-<summary>CTest and sanitizer screenshots</summary>
+<summary>CTest, sanitizer and GitHub Actions screenshots</summary>
 <p align="center">
   <img src="assets/screenshots/ctest.png" width="620" alt="CTest output listing 38 tests, all passed, GCC 13.3 build with warnings as errors">
   <img src="assets/screenshots/ctest_sanitizers.png" width="620" alt="CTest output of the AddressSanitizer and UndefinedBehaviorSanitizer build, 38 of 38 tests passed">
   <br><sub>Rendered from the recorded logs in <code>assets/evidence/</code>.</sub>
+</p>
+<p align="center">
+  <img src="assets/screenshots/ci_actions.jpg" width="620" alt="GitHub Actions run summary page showing all seven CI jobs successful: Linux gcc Debug and Release, Linux clang Debug and Release, ASan plus UBSan for gcc and clang, and Windows MSVC">
+  <br><sub>Browser capture of GitHub Actions run <a href="https://github.com/Joun-Mikhail/embedded-firmware-update-lab/actions/runs/45277523799">#4</a> (pull request commit <code>a43f70d</code>), 2026-11-23.</sub>
 </p>
 </details>
 
