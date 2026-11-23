@@ -1,0 +1,18 @@
+Embedded Firmware Update Lab
+----------------------------------------
+[DEVICE] Installed firmware: v1 (4096 bytes, CRC-32 0xB05FA4B0)
+
+[START ] Update requested: v2 (10000 bytes, image CRC-32 0x30757AFB, 42 packets)
+[DATA  ] Received 40/40 DATA packets
+[CHECK ] Packet + image integrity: PASSED (OK)
+[COMMIT] Installed firmware: v2, state VERIFIED
+
+[START ] Update requested: v3 (12000 bytes, 49 packets)
+[FAULT ] Flipped bit 2 of payload byte 100 in packet #20, packet CRC re-sealed
+[DATA  ] Received 47/47 DATA packets (each passed its packet CRC)
+[CHECK ] Image integrity: FAILED at FINISH (IMAGE_CRC_MISMATCH)
+[SAFE  ] Installed firmware remains v2 (bytes unchanged), state FAILED
+
+[RESET ] Receiver reset to IDLE, clean v3 retransmitted: ACCEPTED -> v3 installed
+----------------------------------------
+RESULT: Update recovery and atomicity verified

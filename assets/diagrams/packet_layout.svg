@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1118" height="250" viewBox="0 0 1118 250" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+<rect width="1118" height="250" rx="12" fill="#0B1628"/>
+<text x="30" y="38" fill="#E6EEF8" font-size="18" font-weight="700">FWUP v1 packet layout</text>
+<text x="270" y="38" fill="#8FA7C4" font-size="13">big-endian · header 14 B · max packet 274 B</text>
+<rect x="31" y="70" width="182" height="64" rx="6" fill="#1F6FEB"/>
+<text x="122" y="98" fill="#FFFFFF" font-size="13" font-weight="700" text-anchor="middle">MAGIC</text>
+<text x="122" y="118" fill="#E6EEF8" font-size="11" text-anchor="middle">"FWUP"</text>
+<text x="34" y="62" fill="#8FA7C4" font-size="11">0</text>
+<text x="122" y="152" fill="#8FA7C4" font-size="11" text-anchor="middle">4 B</text>
+<rect x="215" y="70" width="62" height="64" rx="6" fill="#0E7C86"/>
+<text x="246" y="98" fill="#FFFFFF" font-size="13" font-weight="700" text-anchor="middle">VER</text>
+<text x="246" y="118" fill="#E6EEF8" font-size="11" text-anchor="middle">0x01</text>
+<text x="218" y="62" fill="#8FA7C4" font-size="11">4</text>
+<text x="246" y="152" fill="#8FA7C4" font-size="11" text-anchor="middle">1 B</text>
+<rect x="279" y="70" width="62" height="64" rx="6" fill="#0E7C86"/>
+<text x="311" y="98" fill="#FFFFFF" font-size="13" font-weight="700" text-anchor="middle">TYPE</text>
+<text x="311" y="118" fill="#E6EEF8" font-size="11" text-anchor="middle">1-4</text>
+<text x="282" y="62" fill="#8FA7C4" font-size="11">5</text>
+<text x="311" y="152" fill="#8FA7C4" font-size="11" text-anchor="middle">1 B</text>
+<rect x="344" y="70" width="90" height="64" rx="6" fill="#5A6B85"/>
+<text x="389" y="98" fill="#FFFFFF" font-size="13" font-weight="700" text-anchor="middle">RESERVED</text>
+<text x="389" y="118" fill="#E6EEF8" font-size="11" text-anchor="middle">0x0000</text>
+<text x="347" y="62" fill="#8FA7C4" font-size="11">6</text>
+<text x="389" y="152" fill="#8FA7C4" font-size="11" text-anchor="middle">2 B</text>
+<rect x="436" y="70" width="182" height="64" rx="6" fill="#1F6FEB"/>
+<text x="527" y="98" fill="#FFFFFF" font-size="13" font-weight="700" text-anchor="middle">SEQUENCE</text>
+<text x="527" y="118" fill="#E6EEF8" font-size="11" text-anchor="middle">u32 BE</text>
+<text x="439" y="62" fill="#8FA7C4" font-size="11">8</text>
+<text x="527" y="152" fill="#8FA7C4" font-size="11" text-anchor="middle">4 B</text>
+<rect x="620" y="70" width="90" height="64" rx="6" fill="#0E7C86"/>
+<text x="665" y="98" fill="#FFFFFF" font-size="13" font-weight="700" text-anchor="middle">LENGTH N</text>
+<text x="665" y="118" fill="#E6EEF8" font-size="11" text-anchor="middle">u16 BE</text>
+<text x="623" y="62" fill="#8FA7C4" font-size="11">12</text>
+<text x="665" y="152" fill="#8FA7C4" font-size="11" text-anchor="middle">2 B</text>
+<rect x="712" y="70" width="191" height="64" rx="6" fill="#2E8B57"/>
+<text x="807" y="98" fill="#FFFFFF" font-size="13" font-weight="700" text-anchor="middle">PAYLOAD</text>
+<text x="807" y="118" fill="#E6EEF8" font-size="11" text-anchor="middle">0..256 bytes</text>
+<text x="715" y="62" fill="#8FA7C4" font-size="11">14</text>
+<text x="807" y="152" fill="#8FA7C4" font-size="11" text-anchor="middle">N B</text>
+<rect x="905" y="70" width="182" height="64" rx="6" fill="#B7791F"/>
+<text x="996" y="98" fill="#FFFFFF" font-size="13" font-weight="700" text-anchor="middle">CRC-32</text>
+<text x="996" y="118" fill="#E6EEF8" font-size="11" text-anchor="middle">u32 BE</text>
+<text x="908" y="62" fill="#8FA7C4" font-size="11">14+N</text>
+<text x="996" y="152" fill="#8FA7C4" font-size="11" text-anchor="middle">4 B</text>
+<path d="M30 166 v8 H900 v-8" fill="none" stroke="#B7791F" stroke-width="2"/>
+<text x="467" y="194" fill="#F2C46D" font-size="12" text-anchor="middle">CRC-32/ISO-HDLC covers bytes [0, 14+N) — header and payload, not the CRC field</text>
+<text x="30" y="232" fill="#8FA7C4" font-size="11">START payload: target_version u32 | image_length u32 | image_crc u32 (12 B) · DATA: 1..256 B · FINISH / ABORT: 0 B</text>
+</svg>

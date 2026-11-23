@@ -1,0 +1,126 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  linux:
+    name: Linux ${{ matrix.compiler }} (${{ matrix.build_type }})
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler: [gcc, clang]
+        build_type: [Debug, Release]
+        include:
+          - compiler: gcc
+            cxx: g++
+          - compiler: clang
+            cxx: clang++
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Toolchain versions
+        run: |
+          ${{ matrix.cxx }} --version | head -1
+          cmake --version | head -1
+
+      - name: Configure (strict warnings as errors)
+        run: >
+          cmake -S . -B build
+          -DCMAKE_CXX_COMPILER=${{ matrix.cxx }}
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          -DFWUPDATE_WARNINGS_AS_ERRORS=ON
+
+      - name: Build library, demo and tests
+        run: cmake --build build --parallel
+
+      - name: Run CTest
+        run: ctest --test-dir build --output-on-failure --output-junit ctest-results.xml
+
+      - name: Run demo
+        run: ./build/fwupdate_demo | tee demo-output.txt
+
+      - name: Publish summary
+        if: always()
+        run: |
+          {
+            echo "### ${{ matrix.compiler }} / ${{ matrix.build_type }}"
+            echo '```'
+            ctest --test-dir build -N | tail -1
+            cat demo-output.txt 2>/dev/null || echo "demo did not run"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.compiler }}-${{ matrix.build_type }}
+          path: |
+            build/ctest-results.xml
+            demo-output.txt
+          if-no-files-found: warn
+
+  sanitizers:
+    name: ASan + UBSan (${{ matrix.compiler }})
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - compiler: gcc
+            cxx: g++
+          - compiler: clang
+            cxx: clang++
+    env:
+      ASAN_OPTIONS: detect_leaks=1:abort_on_error=1:strict_string_checks=1
+      UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure with sanitizers
+        run: >
+          cmake -S . -B build-san
+          -DCMAKE_CXX_COMPILER=${{ matrix.cxx }}
+          -DCMAKE_BUILD_TYPE=Debug
+          -DFWUPDATE_ENABLE_SANITIZERS=ON
+          -DFWUPDATE_WARNINGS_AS_ERRORS=ON
+
+      - name: Build
+        run: cmake --build build-san --parallel
+
+      - name: Run CTest under sanitizers
+        run: ctest --test-dir build-san --output-on-failure --output-junit ctest-sanitizers.xml
+
+      - name: Upload sanitizer evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sanitizer-results-${{ matrix.compiler }}
+          path: build-san/ctest-sanitizers.xml
+          if-no-files-found: warn
+
+  windows:
+    name: Windows MSVC
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure
+        run: cmake -S . -B build -G "Visual Studio 17 2022" -A x64 -DFWUPDATE_WARNINGS_AS_ERRORS=ON
+
+      - name: Build
+        run: cmake --build build --config Release --parallel
+
+      - name: Run CTest
+        run: ctest --test-dir build -C Release --output-on-failure
+
+      - name: Run demo
+        run: .\build\Release\fwupdate_demo.exe
