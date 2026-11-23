@@ -209,4 +209,21 @@ FW_TEST(FW_017_handle_rejects_malformed_packet_objects, "handle() enforces paylo
              Status::PayloadTooLarge);
     CHECK_INSTALLED_IS_V1(rx);
     CHECK_INSTALLED_IS_V1(rx2);
+
+    // An undefined type value cannot come off the wire (decode rejects it),
+    // but a caller of handle() can construct one. It must fail closed, both
+    // from IDLE and in the middle of an active session.
+    auto rx3 = helpers::make_device();
+    CHECK_EQ(rx3.handle(Packet{static_cast<PacketType>(0x09), 0, {}}), Status::InvalidPacketType);
+    CHECK_EQ(rx3.state(), UpdateState::Failed);
+    CHECK_INSTALLED_IS_V1(rx3);
+
+    auto rx4 = helpers::make_device();
+    const PacketStream stream = helpers::v2_stream(100);
+    REQUIRE_EQ(rx4.receive(stream[0]), Status::Ok);
+    REQUIRE_EQ(rx4.receive(stream[1]), Status::Ok);
+    CHECK_EQ(rx4.handle(Packet{static_cast<PacketType>(0x00), 2, {0xAA}}), Status::InvalidPacketType);
+    CHECK_EQ(rx4.state(), UpdateState::Failed);
+    CHECK_EQ(rx4.staged_size(), std::size_t{0});
+    CHECK_INSTALLED_IS_V1(rx4);
 }

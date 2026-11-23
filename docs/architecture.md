@@ -42,7 +42,12 @@ flowchart LR
 1. **Free functions for encode/decode.** The codec is stateless, so
    `encode_packet()` / `decode_packet()` are plain functions returning explicit
    result structs (`EncodeResult`, `DecodeResult`) rather than classes or
-   exceptions. Every failure carries a specific `Status`.
+   exceptions. Every *expected* failure (malformed input, protocol or policy
+   violation) is reported as a specific `Status`; the library never throws for
+   those. Standard-library allocation failures (`std::bad_alloc` from
+   `std::vector`) are not caught and would propagate to the caller. The
+   installed image is still only modified by the `noexcept` commit swap, so
+   such an exception cannot leave it half-written.
 2. **Byte-wise big-endian I/O.** Fields are assembled with shifts from
    individual bytes (`src/byte_io.hpp`); no `reinterpret_cast`, no packed
    structs, no dependency on host endianness or alignment.
@@ -58,7 +63,7 @@ flowchart LR
    commit is a `noexcept` swap plus version assignment, so the installed slot
    is either entirely old or entirely new.
 6. **Fault injection outside the core.** Mutators live in a separate library
-   (`fwupdate_faults`) that the production code never links against, and
+   (`fwupdate_faults`) that the core library (`fwupdate_core`) and the demo never link against, and
    `reseal_crc()` lets tests deliberately get *past* the packet CRC to reach the
    checks behind it.
 7. **Self-contained test harness.** A ~150-line harness (`tests/testkit.*`)

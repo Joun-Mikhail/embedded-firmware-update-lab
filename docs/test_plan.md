@@ -63,7 +63,7 @@ or `./build/tests/fwupdate_tests FW_006_image_corruption_with_valid_packet_crc`.
 | `FW_014_packets_after_completion` | Late DATA / repeated FINISH after VERIFIED → `INVALID_STATE`; replay after reset → `VERSION_ROLLBACK` |
 | `FW_015_start_while_receiving` | Second START → `INVALID_STATE` |
 | `FW_016_start_with_nonzero_sequence` | START seq ≠ 0 → `INVALID_SEQUENCE` |
-| `FW_017_handle_rejects_malformed_packet_objects` | `handle()` applies the decoder's payload rules |
+| `FW_017_handle_rejects_malformed_packet_objects` | `handle()` applies the decoder's payload and type rules; an undefined type value fails closed from IDLE and mid-session |
 | `FW_018_data_exceeds_declared_length` | Extra DATA → `IMAGE_TOO_LARGE` |
 | `FLT_001_mutators_respect_bounds` | Fault helpers never write out of range |
 | `ROB_001_deterministic_malformed_inputs` | 1 200 seeded inputs (random bytes, mutated packets with and without re-sealed CRC, random cut/extend): every accepted packet re-encodes to the identical bytes, receiver never installs anything |
