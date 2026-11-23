@@ -156,7 +156,7 @@ Full matrix: [docs/test_plan.md](docs/test_plan.md#fault-injection-matrix).
 | GCC 13.3, `-Werror` (local) | **38 / 38 passed**, 0 warnings — [log](assets/evidence/ctest_gcc.txt) |
 | Clang 18.1, `-Werror` (local) | **38 / 38 passed**, 0 warnings |
 | GCC 13.3 + AddressSanitizer + UBSan (local) | **38 / 38 passed**, no reports — [log](assets/evidence/ctest_sanitizers_gcc.txt) |
-| GitHub Actions: GCC & Clang × Debug/Release, ASan+UBSan (GCC & Clang), MSVC 2022 | see the CI badge above |
+| GitHub Actions: GCC 13.3 & Clang 18.1 × Debug/Release, ASan+UBSan (GCC & Clang), MSVC 19.44 (VS 2022) `/W4 /WX` | **7 / 7 jobs green, 38 / 38 tests in each** — [workflow runs](https://github.com/Joun-Mikhail/embedded-firmware-update-lab/actions/workflows/ci.yml) |
 | Controlled regression experiment | disabling the image CRC → 3 tests fail; accepting equal versions → 2 tests fail — [details](docs/regression_experiment.md) |
 
 <details>

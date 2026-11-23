@@ -135,9 +135,10 @@ int main(int argc, char** argv) {
                 s3.data_packets);
     const bool rejected = s3.status == Status::ImageCrcMismatch && device.state() == UpdateState::Failed;
     tag("CHECK", rejected ? kRed : kAmber);
-    std::printf("Image integrity: %s%s%s at %s (%s)\n", c(kRed),
-                s3.status == Status::Ok ? "PASSED" : "FAILED", reset(), s3.failed_type.c_str(),
-                to_string(s3.status));
+    const bool v3_failed = s3.status != Status::Ok;
+    std::printf("Image integrity: %s%s%s at %s (%s)\n", c(v3_failed ? kRed : kGreen),
+                v3_failed ? "FAILED" : "PASSED", reset(),
+                v3_failed ? s3.failed_type.c_str() : "-", to_string(s3.status));
     expect(rejected, "corrupted v3 image was not rejected with IMAGE_CRC_MISMATCH");
 
     const bool preserved = device.installed_version() == 2U && device.installed_image() == v2;
