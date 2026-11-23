@@ -27,7 +27,7 @@ stateDiagram-v2
 | **IDLE** | No update active. | Staging buffer empty. Installed image/version unchanged. Only START is acceptable. |
 | **RECEIVING** | START accepted. | `staged_size ≤ declared length`; staging holds exactly the payloads of DATA 1..k in order; `next_sequence = k + 1`; installed image/version unchanged. |
 | **VERIFIED** | Last update committed. | Installed image = received image, installed version = target version, staging empty. |
-| **FAILED** | Last update rejected. | Staging cleared, nothing committed; installed image/version identical to before the attempt. `last_status()` holds the reason. |
+| **FAILED** | Last update rejected. | Staging cleared, nothing committed; installed image/version identical to before the attempt. `last_status()` holds the rejection reason until the next packet is offered (see rule 2). |
 
 ## Transition rules
 

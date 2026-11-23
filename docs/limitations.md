@@ -18,4 +18,6 @@ before drawing conclusions from it.
 | Resource limits | The 64 KiB image limit and 256-byte payload limit are simulator choices, not statements about any specific MCU. |
 | Testing scope | Tests and sanitizers check the executed paths only. The bounded robustness test (1 200 seeded inputs) is not a coverage-guided fuzzing campaign. Passing sanitizers does not prove the absence of memory errors. |
 | Platforms | Verified status per platform is listed in the README; anything not run in CI or locally is unverified. |
+| Version policy | Versions must strictly increase, so an image that declares version `0xFFFFFFFF` blocks every later update. Because CRC-32 is forgeable, nothing stops such a START from being crafted on purpose (see *Authentication*). |
+| Error handling | Expected failures return a `Status`; out-of-memory (`std::bad_alloc` from `std::vector`) is not handled and would propagate as an exception. |
 | Certification | This is not a security assessment or certification of any kind. |

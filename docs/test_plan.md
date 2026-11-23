@@ -63,7 +63,7 @@ or `./build/tests/fwupdate_tests FW_006_image_corruption_with_valid_packet_crc`.
 | `FW_014_packets_after_completion` | Late DATA / repeated FINISH after VERIFIED → `INVALID_STATE`; replay after reset → `VERSION_ROLLBACK` |
 | `FW_015_start_while_receiving` | Second START → `INVALID_STATE` |
 | `FW_016_start_with_nonzero_sequence` | START seq ≠ 0 → `INVALID_SEQUENCE` |
-| `FW_017_handle_rejects_malformed_packet_objects` | `handle()` applies the decoder's payload rules |
+| `FW_017_handle_rejects_malformed_packet_objects` | `handle()` applies the decoder's payload and type rules; an undefined type value fails closed from IDLE and mid-session |
 | `FW_018_data_exceeds_declared_length` | Extra DATA → `IMAGE_TOO_LARGE` |
 | `FLT_001_mutators_respect_bounds` | Fault helpers never write out of range |
 | `ROB_001_deterministic_malformed_inputs` | 1 200 seeded inputs (random bytes, mutated packets with and without re-sealed CRC, random cut/extend): every accepted packet re-encodes to the identical bytes, receiver never installs anything |
@@ -101,7 +101,7 @@ installed firmware. All rows are executed by `FW_010` (unless noted).
 | GCC 13.3 + ASan + UBSan (local) | 38/38 passed, no sanitizer reports | [`assets/evidence/ctest_sanitizers_gcc.txt`](../assets/evidence/ctest_sanitizers_gcc.txt) |
 | Clang 18.1 + ASan + UBSan | 38/38 passed in CI (the local Clang install lacks the ASan runtime, so this ran in CI only) | GitHub Actions `sanitizers` job |
 | GCC 13.3 / Clang 18.1 × Debug/Release, `-Werror` | 38/38 passed in each CI job, demo exit 0 | GitHub Actions `linux` jobs (JUnit XML uploaded as artifacts) |
-| MSVC 19.51 (VS Build Tools 2026), Release, `/W4 /WX` | 38/38 passed, demo exit 0, 0 warnings | Author's own Windows 11 PC, 2026-11-23 ([screenshots](../README.md#on-a-windows-pc)) |
+| MSVC 19.51 (VS Build Tools 2026), Release, `/W4 /WX` | 38/38 passed, demo exit 0, 0 warnings | Author's own Windows 11 PC, 2026-11-23 ([screen captures](../README.md#see-it-run)) |
 | MSVC 19.44 (Visual Studio 2022), Release, `/W4 /WX` | 38/38 passed in CI, demo exit 0, 0 warnings | GitHub Actions `windows` job |
 | Demo | exit 0 | [`assets/evidence/demo_output.txt`](../assets/evidence/demo_output.txt) |
 | Controlled regression experiment | defects detected, then reverted | [regression_experiment.md](regression_experiment.md) |
